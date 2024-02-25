@@ -29,7 +29,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.500000
 d 1.000000
 illum 3
-map_Kd C:/07_-_Default_baseColor.png
+map_Kd 07_-_Default_baseColor.png
 
 newmtl 08_-_Default
 Ns 168.306290
