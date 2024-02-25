@@ -112,25 +112,26 @@ int main()
     // load and create a texture 
     // ---------------------
     //Model ourModelMario("model/mario/mario.obj");  // load the model mario.obj
-    Model ourModelMario("model/mario/mario.obj");  // load the model mario.obj
-    Model ourModelVillano("model/villano/villano.obj"); // load the model villano.obj
-    Model ourModelPozo("model/pozo/pozo.obj");  // load the model pozo.obj
-    Model ourModelRecompensa("model/recompensa/recompensa.obj"); // load the model recompensa.obj
-    Model ourModelPasillo("model/pasillo/pasillo.obj"); // load the model pasillo.obj   
+    Model ourModelMario("model/mario/mario/mario.obj");  // load the model mario.obj
+    Model ourModelVillano("model/villano/villano/villano.obj"); // load the model villano.obj
+    Model ourModelPiedra("model/thwomp_super_mario_bros/Thwomp.obj");
+    Model ourModelPozo("model/pozo/pozo/pozo.obj");  // load the model pozo.obj
+    Model ourModelRecompensa("model/recompensa/recompensa/recompensa.obj"); // load the model recompensa.obj
+    Model ourModelPasillo("model/pasillo/pasillo/pasillo.obj"); // load the model pasillo.obj   
     
     // Cargar modelos que se seran iluminados (Monedas) 
-    Model ourModelMoneda("model/moneda/moneda.obj"); 
+    Model ourModelMoneda("model/moneda/moneda/moneda.obj"); 
     //Cargar modelo Camara_guy
-    Model ourModelCamara("model/camera_guy/camera_guy.obj"); 
+    Model ourModelCamara("model/camera_guy/camera_guy/camera_guy.obj"); 
 
     // Cargar modelo para el suelo 
     Model ourModelLava("model/lava/lava.obj");
 
     //Cargar modelo sky 
-    Model ourModelSky("model/sky/sky.obj");
+    Model ourModelSky("model/sky/sky/sky.obj");
 
     //Cargar model moon
-    Model ourModelMoon("model/Moon/moon.obj");
+    Model ourModelMoon("model/Moon/Moon/moon.obj");
 
     // Cargar modelos que tendran Luz 
    // draw in wireframe
@@ -163,7 +164,10 @@ glm::vec3 pointLightPositions[] = {
 };
 
 
-    camera.MovementSpeed = 10; //Optional. Modify the speed of the camera
+    camera.MovementSpeed = 5; //Optional. Modify the speed of the camera
+    float stoneMovementTime = 0.0f;//moviemiento de las piedras
+    float amplitudFactor = 0.175f;
+    float maxAlturaOffset = 0.2f;
 
     // render loop
     // -----------
@@ -301,7 +305,30 @@ glm::vec3 pointLightPositions[] = {
         model = glm::translate(model, glm::vec3(-0.4f, 0.15f, offset1)); 
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //Para que las monedas roten en eje x 
         
-        
+        // Incrementar la variable de tiempo
+        stoneMovementTime += deltaTime;
+
+        // Renderizado de la primera piedra
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.5f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
+        model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
+        ourShader.setMat4("model", model);
+        ourModelPiedra.Draw(ourShader);
+
+        // Renderizado de la segunda piedra
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.3f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
+        model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
+        ourShader.setMat4("model", model);
+        ourModelPiedra.Draw(ourShader);
+
+        // Renderizado de la tercer piedra a la izquierda del primero
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.7f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
+        model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
+        ourShader.setMat4("model", model);
+        ourModelPiedra.Draw(ourShader);
+
         //Movimiento de Traslacion del elemenento en el eje X
         offset1 = offset1 + direction*0.006f;
         if (offset < -7.5 || offset1 > -4.7f) {
