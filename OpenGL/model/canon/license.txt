@@ -1,0 +1,11 @@
+Model Information:
+* title:	Canon
+* source:	https://sketchfab.com/3d-models/canon-4e5ee6cd1e72425482828bc70f0b7cfa
+* author:	Gastón Gamedev (https://sketchfab.com/GastonGamedev)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Canon" (https://sketchfab.com/3d-models/canon-4e5ee6cd1e72425482828bc70f0b7cfa) by Gastón Gamedev (https://sketchfab.com/GastonGamedev) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
