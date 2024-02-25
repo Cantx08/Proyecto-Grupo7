@@ -115,6 +115,8 @@ int main()
     Model ourModelMario("model/mario/mario/mario.obj");  // load the model mario.obj
     Model ourModelVillano("model/villano/villano/villano.obj"); // load the model villano.obj
     Model ourModelPiedra("model/thwomp_super_mario_bros/Thwomp.obj");
+    Model ourModelCanon("model/canon/canon.obj");
+    Model ourModelBill("model/bullet_bill_super_mario_bros/bill.obj");
     Model ourModelPozo("model/pozo/pozo/pozo.obj");  // load the model pozo.obj
     Model ourModelRecompensa("model/recompensa/recompensa/recompensa.obj"); // load the model recompensa.obj
     Model ourModelPasillo("model/pasillo/pasillo/pasillo.obj"); // load the model pasillo.obj   
@@ -168,6 +170,11 @@ glm::vec3 pointLightPositions[] = {
     float stoneMovementTime = 0.0f;//moviemiento de las piedras
     float amplitudFactor = 0.175f;
     float maxAlturaOffset = 0.2f;
+
+    // Variables de control de la bala
+    glm::vec3 bulletPosition;
+    bool bulletActive = false;
+    float bulletStartTime = 0.0f;
 
     // render loop
     // -----------
@@ -269,8 +276,7 @@ glm::vec3 pointLightPositions[] = {
             model = glm::rotate(model, glm::radians(angleCoin), glm::vec3(0.0f, -1.0f, 0.0f)); //Para que las monedas roten en eje y 
             ourShader.setMat4("model", model);
             ourModelMoneda.Draw(ourShader);
-        } 
-
+        }
         
           //render de loaded Model Camara_guy 
         model = glm::mat4(1.0f);
@@ -304,7 +310,18 @@ glm::vec3 pointLightPositions[] = {
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-0.4f, 0.15f, offset1)); 
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //Para que las monedas roten en eje x 
-        
+
+        //Movimiento de Traslacion del elemenento en el eje X
+        offset1 = offset1 + direction*0.006f;
+        if (offset < -7.5 || offset1 > -4.7f) {
+
+            direction = -direction;
+        }
+
+        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+        ourShader.setMat4("model", model);
+        ourModelVillano.Draw(ourShader);
+
         // Incrementar la variable de tiempo
         stoneMovementTime += deltaTime;
 
@@ -329,17 +346,22 @@ glm::vec3 pointLightPositions[] = {
         ourShader.setMat4("model", model);
         ourModelPiedra.Draw(ourShader);
 
-        //Movimiento de Traslacion del elemenento en el eje X
-        offset1 = offset1 + direction*0.006f;
-        if (offset < -7.5 || offset1 > -4.7f) {
-
-            direction = -direction;
-        }
-
-        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+        // Renderizado del modelo Canon
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.5f, 0.6f, -7.93f)); // Posición del cañón
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación del cañón (90 grados en el eje Y)
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala del cañón
         ourShader.setMat4("model", model);
-        ourModelVillano.Draw(ourShader);
+        ourModelCanon.Draw(ourShader);
 
+        // Renderizado del modelo bill
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.5f, 0.7f, -7.7f)); // Posición de bill
+        model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f)); // Escala 1000 veces más pequeña
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación del cañón (90 grados en el eje Y)
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala de Bill
+        ourShader.setMat4("model", model);
+        ourModelBill.Draw(ourShader);
 
         // Dibujar el suelo de la escena 
 
@@ -358,6 +380,8 @@ glm::vec3 pointLightPositions[] = {
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); //Para que las monedas roten en eje x 
         ourShader.setMat4("model", model);
         ourModelMario.Draw(ourShader);
+
+
 
         ourModelShader.use();
         ourModelShader.setMat4("projection", projection);
