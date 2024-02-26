@@ -1,0 +1,42 @@
+# Blender 4.0.2 MTL File: 'None'
+# www.blender.org
+
+newmtl 01___Default
+Ns 11.111063
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd 01___Default_baseColor.png
+
+newmtl 02___Default
+Ns 11.111063
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd 02___Default_baseColor.png
+
+newmtl 03___Default
+Ns 11.111063
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd 03___Default_baseColor.png
+
+newmtl 03___Default.001
+Ns 11.111063
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd 03___Default.001_baseColor.png
+map_d 03___Default.001_baseColor.png
