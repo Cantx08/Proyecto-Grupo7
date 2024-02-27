@@ -10,10 +10,12 @@
 #include <learnopengl/model.h>
 
 #include <iostream>
+#include <vector>
 
 #define STB_IMAGE_IMPLEMENTATION 
 #include <learnopengl/stb_image.h>
 
+using namespace std;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -47,6 +49,9 @@ float offset1 = -5.0f; // Posicion inicial
 float direction = 1.0f;
 // Velocidad de Rotacion para el Pozo 
 float VelocidadRota = 4.0f;
+
+std::vector<Model> backgroundModels;
+int currentBackgroundIndex = 0;  // Índice del fondo actual
 
 int main()
 {
@@ -107,7 +112,10 @@ int main()
     Model ourModelLevel1("model/level1/level1.obj"); //Nivel 1 de mario
     Model ourModelMoneda("model/moneda/moneda.obj"); // Monedas
     Model ourModelCameraGuy("model/camera_guy/camera_guy.obj"); //camera guy
-    Model ourModelSky1("model/fondo/fondo4.obj"); //fondo
+    Model ourModelSky1("model/fondo/fondo4.obj");
+    Model ourModelSky2("model/fondo/fondo3.obj");
+    Model ourModelSky3("model/fondo/fondo2.obj");
+    Model ourModelSky4("model/fondo/fondo1.obj");
     Model ourModelMisteryBox("model/misteryBox/misteryBox.obj");
     Model ourModelStar("model/star/star.obj");
 
@@ -118,6 +126,11 @@ int main()
     Model ourModelGoomba("model/goomba/goomba.obj"); //Hongo
 
 
+    // Agrega los modelos al vector
+    backgroundModels.push_back(ourModelSky1);
+    backgroundModels.push_back(ourModelSky2);
+    backgroundModels.push_back(ourModelSky3);
+    backgroundModels.push_back(ourModelSky4);
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -418,12 +431,19 @@ int main()
 
       
          //render de loaded Model Fondo
+         //lightingShader.setBool("modelHasSpecular", false);
+         //model = glm::mat4(1.0f);
+         //model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f)); // translate it down so it's at the center of the scene
+         //model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));	// it's a bit too big for our scene, so scale it down
+         //lightingShader.setMat4("model", model);
+         //ourModelSky3.Draw(lightingShader);
+         //lightingShader.setBool("modelHasSpecular", true);
          lightingShader.setBool("modelHasSpecular", false);
          model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f)); // translate it down so it's at the center of the scene
-         model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));	// it's a bit too big for our scene, so scale it down
+         model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f));
+         model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
          lightingShader.setMat4("model", model);
-         ourModelSky1.Draw(lightingShader);
+         backgroundModels[currentBackgroundIndex].Draw(lightingShader);
          lightingShader.setBool("modelHasSpecular", true);
 
          //render de loaded Model coin
@@ -502,6 +522,12 @@ void processInput(GLFWwindow* window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    // Cambia el fondo cuando se presiona la flecha derecha
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
+        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundModels.size();
+    }
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
