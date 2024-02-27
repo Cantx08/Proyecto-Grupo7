@@ -211,6 +211,9 @@ int main()
     bool bulletActive = false;
     float bulletStartTime = 0.0f;
 
+    float billMovementTime = 0.0f;
+    float resetTime = 2.0f;
+
 
  // render loop
  // -----------
@@ -223,6 +226,8 @@ int main()
      float currentFrame = glfwGetTime();
      deltaTime = currentFrame - lastFrame;
      lastFrame = currentFrame;
+
+     billMovementTime += deltaTime;
 
      // input
      // -----
@@ -395,14 +400,20 @@ int main()
          lightingShader.setMat4("model", model);
          ourModelCanon.Draw(lightingShader);
 
-         // Renderizado del modelo bill
+         // Mover la bala hacia adelante
          model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.5f, 0.7f, -7.7f)); // Posición de bill
+         model = glm::translate(model, glm::vec3(-0.5f, 0.7f, -7.7f + billMovementTime)); // Posición de la bala
          model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f)); // Escala 1000 veces más pequeña
          model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación del cañón (90 grados en el eje Y)
-         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala de Bill
+         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala de la bala
          lightingShader.setMat4("model", model);
          ourModelBill.Draw(lightingShader);
+
+         // Verificar si es el momento de reiniciar la posición
+         if (billMovementTime >= resetTime)
+         {
+             billMovementTime = 0.0f; // Reiniciar el tiempo
+         }
          //-----------------------------------------------------------------
 
       
