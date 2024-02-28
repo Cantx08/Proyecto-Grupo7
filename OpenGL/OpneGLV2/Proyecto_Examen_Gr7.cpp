@@ -104,8 +104,8 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
-	 // build and compile our shader zprogram
-    // ------------------------------------
+    // build and compile our shader zprogram
+   // ------------------------------------
 
     Shader lightingShader("shaders/EB2_vertexshader_model.vs", "shaders/EB2_fragmentshader_model.fs");//shader para la iluminacion y modelos
     Shader lightModelShader("shaders/EB2_vertexshader_lightmodel.vs", "shaders/EB2_fragmentshader_lightmodel.fs"); //shader para cubo de luz
@@ -204,7 +204,7 @@ int main()
     };
 
     //--------------------------------------------------------------
-	
+
     // first, configure the cube's lightCubeVAO (and VBO)
     unsigned int VBO, lightCubeVAO;
     glGenVertexArrays(1, &lightCubeVAO);
@@ -217,7 +217,7 @@ int main()
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-   
+
 
     camera.MovementSpeed = 5; //Optional. Modify the speed of the camera
     float stoneMovementTime = 0.0f;//moviemiento de las piedras
@@ -233,263 +233,273 @@ int main()
     float resetTime = 2.0f;
 
 
- // render loop
- // -----------
- while (!glfwWindowShouldClose(window))
- {
-     // per-frame time logic
-     // --------------------
-     float currentFrame = glfwGetTime();
-     deltaTime = currentFrame - lastFrame;
-     lastFrame = currentFrame;
+    glm::vec3 marioPos = glm::vec3(0.0f, 0.0f, 0.0f);
+    // render loop
+    // -----------
+    while (!glfwWindowShouldClose(window))
+    {
+        // per-frame time logic
+        // --------------------
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-     billMovementTime += deltaTime;
+        billMovementTime += deltaTime;
 
-     // input
-     // -----
-     processInput(window);
-	 
-     // render
-     // ------
-     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-     // be sure to activate shader when setting uniforms/drawing objects
-     lightingShader.use();
-	 lightingShader.setVec3("viewPos", camera.Position);
-	 lightingShader.setFloat("material.shininess", 32.0f); //brillo modelos
-
-     // --------------directional light (Luz de la luna)
-     lightingShader.setVec3("dirLight.direction", 0.0348032, -0.556294, 0.830256); // Dirección de la luz
-     lightingShader.setVec3("dirLight.ambient", 0.09f, 0.09f, 0.17f);        // Componente ambiental (azul)
-     lightingShader.setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.3f);        // Componente difusa (azul)
-     lightingShader.setVec3("dirLight.specular", 0.4f, 0.4f, 0.4f);       // Componente especular (blanco)
-
-     
-     // ---------------Point light
-     // Simulando una luz para los pointlights cálida con vectores
-     glm::vec3 ambient = glm::vec3(0.1f); // Luz ambiental, 10% de intensidad
-     glm::vec3 diffuse = glm::vec3(0.8f); // Luz difusa, 80% de intensidad
-     glm::vec3 specular = glm::vec3(0.8f); // Luz especular, 80% de intensidad
-
-     //Luz de la estrella (se prende y se apaga)
-     timeEstrella += deltaTime;
-     // Calcula el factor de atenuación basado en el tiempo
-     float attenuationFactor = 0.5f * (sinf(attenuationSpeed * timeEstrella) + 1.0f); // Esto generará una oscilación suave entre 0 y 1
-
-     lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-     lightingShader.setVec3("pointLights[0].ambient", ambient.x * attenuationFactor, ambient.y * attenuationFactor, ambient.z * attenuationFactor);
-     lightingShader.setVec3("pointLights[0].diffuse", 1.0f * attenuationFactor, 1.0f * attenuationFactor, 0.0f * attenuationFactor);
-     lightingShader.setVec3("pointLights[0].specular", 1.0f * attenuationFactor, 1.0f * attenuationFactor, 0.0f * attenuationFactor);
-     lightingShader.setFloat("pointLights[0].constant", 1.0f);
-     lightingShader.setFloat("pointLights[0].linear", 0.19);
-     lightingShader.setFloat("pointLights[0].quadratic", 0.32);
-     
-     //Luz de monedas
-     for (int i = 1; i < 13; ++i) {
-        lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
-        lightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", ambient.x * 0.1, ambient.y * 0.1, ambient.z * 0.1);
-        lightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", diffuse);
-        lightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", specular);
-        lightingShader.setFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-        lightingShader.setFloat("pointLights[" + std::to_string(i) + "].linear", 0.29);
-        lightingShader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.42);
-      }
-
-        
-    //------------------spotLight (camera guy flashlight)
-    lightingShader.setVec3("spotLight.position", -2.5663f, 1.61352f, -16.0371f);
-    lightingShader.setVec3("spotLight.direction", 0.99877f, -0.0314112f, 0.0383667f);
-    lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-    lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-    lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.setFloat("spotLight.constant", 1.0f);
-    lightingShader.setFloat("spotLight.linear", 0.19);
-    lightingShader.setFloat("spotLight.quadratic", 0.32);
-    lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(8.0f)));
-    lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(10.0f)));
+        // input
+        // -----
+        processInput(window);
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+            marioPos.z -= 0.01f;
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+            marioPos.z += 0.01f;
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+            marioPos.x -= 0.01f;
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+            marioPos.x += 0.01f;
 
 
-     // view/projection transformations
-     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-     glm::mat4 view = camera.GetViewMatrix();
-     lightingShader.setMat4("projection", projection);
-     lightingShader.setMat4("view", view);
+        // render
+        // ------
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-     // world transformation
-     glm::mat4 model = glm::mat4(1.0f);
-     lightingShader.setMat4("model", model);
-	 
-     //------------------------------- Render de los modelos --------------------------
-         //render de loaded model level1 
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.9f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
-         lightingShader.setMat4("model", model);
-         ourModelLevel1.Draw(lightingShader);
+        // be sure to activate shader when setting uniforms/drawing objects
+        lightingShader.use();
+        lightingShader.setVec3("viewPos", camera.Position);
+        lightingShader.setFloat("material.shininess", 32.0f); //brillo modelos
 
-         //render de loaded Model Camara_guy 
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-2.5663f, 1.31352f, -16.0371f));
-         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-         model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	
-         lightingShader.setMat4("model", model);
-         ourModelCameraGuy.Draw(lightingShader);
+        // --------------directional light (Luz de la luna)
+        lightingShader.setVec3("dirLight.direction", 0.0348032, -0.556294, 0.830256); // Dirección de la luz
+        lightingShader.setVec3("dirLight.ambient", 0.09f, 0.09f, 0.17f);        // Componente ambiental (azul)
+        lightingShader.setVec3("dirLight.diffuse", 0.2f, 0.2f, 0.3f);        // Componente difusa (azul)
+        lightingShader.setVec3("dirLight.specular", 0.4f, 0.4f, 0.4f);       // Componente especular (blanco)
 
-         //render de loaded Model MisteryBox 
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.530667f, 1.1269f, -16.0179f));
-         model = glm::scale(model, glm::vec3(0.004f, 0.004f, 0.004f));
-         lightingShader.setMat4("model", model);
-         ourModelMisteryBox.Draw(lightingShader);
 
-         //render de loaded Model Mario
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.514134f, 0.232393f, 5.45899f));
-         model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-         model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
-         lightingShader.setMat4("model", model);
-         ourModelMario.Draw(lightingShader);
+        // ---------------Point light
+        // Simulando una luz para los pointlights cálida con vectores
+        glm::vec3 ambient = glm::vec3(0.1f); // Luz ambiental, 10% de intensidad
+        glm::vec3 diffuse = glm::vec3(0.8f); // Luz difusa, 80% de intensidad
+        glm::vec3 specular = glm::vec3(0.8f); // Luz especular, 80% de intensidad
 
-         //ENEMIGOS
-         //------------render de loaded Model Goomba---------------
-        //Movimiento
-        // Calcular la posición Z actual usando la función seno
+        //Luz de la estrella (se prende y se apaga)
+        timeEstrella += deltaTime;
+        // Calcula el factor de atenuación basado en el tiempo
+        float attenuationFactor = 0.5f * (sinf(attenuationSpeed * timeEstrella) + 1.0f); // Esto generará una oscilación suave entre 0 y 1
+
+        lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+        lightingShader.setVec3("pointLights[0].ambient", ambient.x * attenuationFactor, ambient.y * attenuationFactor, ambient.z * attenuationFactor);
+        lightingShader.setVec3("pointLights[0].diffuse", 1.0f * attenuationFactor, 1.0f * attenuationFactor, 0.0f * attenuationFactor);
+        lightingShader.setVec3("pointLights[0].specular", 1.0f * attenuationFactor, 1.0f * attenuationFactor, 0.0f * attenuationFactor);
+        lightingShader.setFloat("pointLights[0].constant", 1.0f);
+        lightingShader.setFloat("pointLights[0].linear", 0.19);
+        lightingShader.setFloat("pointLights[0].quadratic", 0.32);
+
+        //Luz de monedas
+        for (int i = 1; i < 13; ++i) {
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[i]);
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", ambient.x * 0.1, ambient.y * 0.1, ambient.z * 0.1);
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", diffuse);
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", specular);
+            lightingShader.setFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
+            lightingShader.setFloat("pointLights[" + std::to_string(i) + "].linear", 0.29);
+            lightingShader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.42);
+        }
+
+
+        //------------------spotLight (camera guy flashlight)
+        lightingShader.setVec3("spotLight.position", -2.5663f, 1.61352f, -16.0371f);
+        lightingShader.setVec3("spotLight.direction", 0.99877f, -0.0314112f, 0.0383667f);
+        lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+        lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        lightingShader.setFloat("spotLight.constant", 1.0f);
+        lightingShader.setFloat("spotLight.linear", 0.19);
+        lightingShader.setFloat("spotLight.quadratic", 0.32);
+        lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(8.0f)));
+        lightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(10.0f)));
+
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        lightingShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", view);
+
+        // world transformation
+        glm::mat4 model = glm::mat4(1.0f);
+        lightingShader.setMat4("model", model);
+
+        //------------------------------- Render de los modelos --------------------------
+            //render de loaded model level1 
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.9f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));	// it's a bit too big for our scene, so scale it down
+        lightingShader.setMat4("model", model);
+        ourModelLevel1.Draw(lightingShader);
+
+        //render de loaded Model Camara_guy 
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-2.5663f, 1.31352f, -16.0371f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+        lightingShader.setMat4("model", model);
+        ourModelCameraGuy.Draw(lightingShader);
+
+        //render de loaded Model MisteryBox 
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.530667f, 1.1269f, -16.0179f));
+        model = glm::scale(model, glm::vec3(0.004f, 0.004f, 0.004f));
+        lightingShader.setMat4("model", model);
+        ourModelMisteryBox.Draw(lightingShader);
+
+        //render de loaded Model Mario
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.514134f+marioPos.x, 0.232393f, 5.45899f+marioPos.z));
+        model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
+        lightingShader.setMat4("model", model);
+        ourModelMario.Draw(lightingShader);
+
+        //ENEMIGOS
+        //------------render de loaded Model Goomba---------------
+       //Movimiento
+       // Calcular la posición Z actual usando la función seno
         zOffset = glm::sin(glfwGetTime() * 0.5f) * 0.50238f; // Ajusta la velocidad y amplitud del movimiento
-        zPos = 2.99797f + zOffset; 
+        zPos = 2.99797f + zOffset;
 
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.64199, 0.355299, zPos));
-         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
-         model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
-         lightingShader.setMat4("model", model);
-         ourModelGoomba.Draw(lightingShader);
-         //--------------------------------------------
-         // Incrementar la variable de tiempo
-         stoneMovementTime += deltaTime;
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.64199, 0.355299, zPos));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
+        lightingShader.setMat4("model", model);
+        ourModelGoomba.Draw(lightingShader);
+        //--------------------------------------------
+        // Incrementar la variable de tiempo
+        stoneMovementTime += deltaTime;
 
-         // Renderizado de la primera piedra
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.5f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
-         model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
-         lightingShader.setMat4("model", model);
-         ourModelPiedra.Draw(lightingShader);
+        // Renderizado de la primera piedra
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.5f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
+        model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
+        lightingShader.setMat4("model", model);
+        ourModelPiedra.Draw(lightingShader);
 
-         // Renderizado de la segunda piedra
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.3f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
-         model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
-         lightingShader.setMat4("model", model);
-         ourModelPiedra.Draw(lightingShader);
+        // Renderizado de la segunda piedra
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.3f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
+        model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
+        lightingShader.setMat4("model", model);
+        ourModelPiedra.Draw(lightingShader);
 
-         // Renderizado de la tercer piedra a la izquierda del primero
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.7f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
-         model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
-         lightingShader.setMat4("model", model);
-         ourModelPiedra.Draw(lightingShader);
+        // Renderizado de la tercer piedra a la izquierda del primero
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.7f, 0.65f - (amplitudFactor * sin(stoneMovementTime) + maxAlturaOffset), 1.2f));
+        model = glm::scale(model, glm::vec3(0.0001f, 0.0001f, 0.0001f)); // Escala 1000 veces más pequeña
+        lightingShader.setMat4("model", model);
+        ourModelPiedra.Draw(lightingShader);
 
-         // Renderizado del modelo Canon
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.5f, 0.6f, -7.93f)); // Posición del cañón
-         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación del cañón (90 grados en el eje Y)
-         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala del cañón
-         lightingShader.setMat4("model", model);
-         ourModelCanon.Draw(lightingShader);
+        // Renderizado del modelo Canon
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.5f, 0.6f, -7.93f)); // Posición del cañón
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación del cañón (90 grados en el eje Y)
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala del cañón
+        lightingShader.setMat4("model", model);
+        ourModelCanon.Draw(lightingShader);
 
-         // Mover la bala hacia adelante
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.5f, 0.7f, -7.7f + billMovementTime)); // Posición de la bala
-         model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f)); // Escala 1000 veces más pequeña
-         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación del cañón (90 grados en el eje Y)
-         model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala de la bala
-         lightingShader.setMat4("model", model);
-         ourModelBill.Draw(lightingShader);
+        // Mover la bala hacia adelante
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.5f, 0.7f, -7.7f + billMovementTime)); // Posición de la bala
+        model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f)); // Escala 1000 veces más pequeña
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación del cañón (90 grados en el eje Y)
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f)); // Escala de la bala
+        lightingShader.setMat4("model", model);
+        ourModelBill.Draw(lightingShader);
 
-         // Verificar si es el momento de reiniciar la posición
-         if (billMovementTime >= resetTime)
-         {
-             billMovementTime = 0.0f; // Reiniciar el tiempo
-         }
-         //-----------------------------------------------------------------
+        // Verificar si es el momento de reiniciar la posición
+        if (billMovementTime >= resetTime)
+        {
+            billMovementTime = 0.0f; // Reiniciar el tiempo
+        }
+        //-----------------------------------------------------------------
 
-      
-         //render de loaded Model Fondo
-         //lightingShader.setBool("modelHasSpecular", false);
-         //model = glm::mat4(1.0f);
-         //model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f)); // translate it down so it's at the center of the scene
-         //model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));	// it's a bit too big for our scene, so scale it down
-         //lightingShader.setMat4("model", model);
-         //ourModelSky3.Draw(lightingShader);
-         //lightingShader.setBool("modelHasSpecular", true);
-         lightingShader.setBool("modelHasSpecular", false);
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f));
-         model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
-         lightingShader.setMat4("model", model);
-         backgroundModels[currentBackgroundIndex].Draw(lightingShader);
-         lightingShader.setBool("modelHasSpecular", true);
 
-         //render de loaded Model coin
-         for (int i = 1; i < 12; i++) { //12 monedas
-             model = glm::mat4(1.0f);
-             model = glm::translate(model, pointLightPositions[i]);
-             model = glm::rotate(model, glm::radians(currentFrame * 50.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación sobre el eje Y
-             model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
-             lightingShader.setMat4("model", model);
-             ourModelMoneda.Draw(lightingShader);
-         }
+        //render de loaded Model Fondo
+        //lightingShader.setBool("modelHasSpecular", false);
+        //model = glm::mat4(1.0f);
+        //model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f)); // translate it down so it's at the center of the scene
+        //model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));	// it's a bit too big for our scene, so scale it down
+        //lightingShader.setMat4("model", model);
+        //ourModelSky3.Draw(lightingShader);
+        //lightingShader.setBool("modelHasSpecular", true);
+        lightingShader.setBool("modelHasSpecular", false);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, -15.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(40.0f, 40.0f, 40.0f));
+        lightingShader.setMat4("model", model);
+        backgroundModels[currentBackgroundIndex].Draw(lightingShader);
+        lightingShader.setBool("modelHasSpecular", true);
 
-         // also draw the lamp object(s)
-         lightModelShader.use();
-         lightModelShader.setMat4("projection", projection);
-         lightModelShader.setMat4("view", view);
+        //render de loaded Model coin
+        for (int i = 1; i < 12; i++) { //12 monedas
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::rotate(model, glm::radians(currentFrame * 50.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación sobre el eje Y
+            model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+            lightingShader.setMat4("model", model);
+            ourModelMoneda.Draw(lightingShader);
+        }
 
-         // render de loaded Model star 
-         lightModelShader.setBool("isStar", true); //Estrella brillosa sin importar la iluminacion ambiente
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-0.514128f, 0.83578f, -9.4153f));
-         model = glm::rotate(model, glm::radians(currentFrame * 50.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación sobre el eje Y
-         model = glm::scale(model, glm::vec3(0.035f, 0.035f, 0.035f));
-         lightModelShader.setMat4("model", model);  
-         ourModelStar.Draw(lightModelShader);
+        // also draw the lamp object(s)
+        lightModelShader.use();
+        lightModelShader.setMat4("projection", projection);
+        lightModelShader.setMat4("view", view);
 
-         //render de loaded Model Moon
-         lightModelShader.setBool("isStar", false); //Pintar de blanco el modelo
-         model = glm::mat4(1.0f);
-         model = glm::translate(model, glm::vec3(-2.91134, 12.5643, -28.5863));
-         model = glm::rotate(model, glm::radians(35.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5));
-         lightModelShader.setMat4("model", model);
-         ourModelMoon1.Draw(lightModelShader);
-    
-         // we now draw as many light bulbs as we have point lights.
-         glBindVertexArray(lightCubeVAO);
+        // render de loaded Model star 
+        lightModelShader.setBool("isStar", true); //Estrella brillosa sin importar la iluminacion ambiente
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-0.514128f, 0.83578f, -9.4153f));
+        model = glm::rotate(model, glm::radians(currentFrame * 50.0f), glm::vec3(0.0f, 1.0f, 0.0f)); // Rotación sobre el eje Y
+        model = glm::scale(model, glm::vec3(0.035f, 0.035f, 0.035f));
+        lightModelShader.setMat4("model", model);
+        ourModelStar.Draw(lightModelShader);
+
+        //render de loaded Model Moon
+        lightModelShader.setBool("isStar", false); //Pintar de blanco el modelo
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-2.91134, 12.5643, -28.5863));
+        model = glm::rotate(model, glm::radians(35.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5));
+        lightModelShader.setMat4("model", model);
+        ourModelMoon1.Draw(lightModelShader);
+
+        // we now draw as many light bulbs as we have point lights.
+        glBindVertexArray(lightCubeVAO);
 
         //Flash de camera guy
         model = glm::mat4(1.0f);
         model = glm::translate(model, pointLightPositions[13]);
-        model = glm::scale(model, glm::vec3(0.02f)); 
+        model = glm::scale(model, glm::vec3(0.02f));
         lightModelShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-         
 
-     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-     // -------------------------------------------------------------------------------
-     glfwSwapBuffers(window);
-     glfwPollEvents();
- }
 
- // optional: de-allocate all resources once they've outlived their purpose:
- // ------------------------------------------------------------------------
- glDeleteVertexArrays(1, &lightCubeVAO);
- glDeleteBuffers(1, &VBO);
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
 
- // glfw: terminate, clearing all previously allocated GLFW resources.
- // ------------------------------------------------------------------
- glfwTerminate();
- return 0;
+    // optional: de-allocate all resources once they've outlived their purpose:
+    // ------------------------------------------------------------------------
+    glDeleteVertexArrays(1, &lightCubeVAO);
+    glDeleteBuffers(1, &VBO);
+
+    // glfw: terminate, clearing all previously allocated GLFW resources.
+    // ------------------------------------------------------------------
+    glfwTerminate();
+    return 0;
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -551,5 +561,3 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
 }
-
-
