@@ -11,6 +11,10 @@
 
 #include <iostream>
 #include <vector>
+#include<Windows.h>
+#include<mmsystem.h>
+
+#pragma commet(lib, "winmm.lib")
 
 #define STB_IMAGE_IMPLEMENTATION 
 #include <learnopengl/stb_image.h>
@@ -57,6 +61,8 @@ float zOffset = 0.0;
 
 std::vector<Model> backgroundModels;
 int currentBackgroundIndex = 0;  // Índice del fondo actual
+
+#pragma comment(lib, "winmm.lib")
 
 int main()
 {
@@ -518,9 +524,15 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 
-    // Cambia el fondo cuando se presiona la flecha derecha
+    bool isMusicPlaying = false;
+
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS) {
-        currentBackgroundIndex = (currentBackgroundIndex + 1) % backgroundModels.size();
+        if (!isMusicPlaying) {
+            std::cout << "Playing music\n";
+            PlaySound(TEXT("C:\\Spider.wav"), NULL, SND_FILENAME | SND_SYNC);
+            isMusicPlaying = true;
+            std::cout << "Music Over\n";
+        }
     }
 
 }
